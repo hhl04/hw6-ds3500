@@ -8,7 +8,7 @@ import pprint as pp
 def main():
 
     tt = Textastic()
-    tt.load_text('file1.txt', 'A')
+    tt.load_text('file1.txt', 'A') #params are file name, label
     tt.load_text('file2.txt', 'B')
     tt.load_text('file3.txt', 'C')
     tt.load_text('myfile.json', 'J', parser=tp.json_parser)
