@@ -17,7 +17,10 @@ def main():
     analyzer = CapTuring()
     
     # Documents folder
-    documents_folder = "/Users/seanblundin/Documents/courses/ds3500_not_fucked_by_github/hw6-ds3500/investigation_new_modularized/documents"
+    # REPLACE YOUR PATH HERE
+    #documents_folder = "/Users/seanblundin/Documents/courses/ds3500_not_fucked_by_github/hw6-ds3500/investigation_new_modularized/documents"
+    
+    documents_folder = "/Users/huytuonghoangle/Documents/GitHub/hw6-ds3500/investigation_new_modularized/documents"
     
     # Define baseline documents representing different perspectives
     baselines = {
