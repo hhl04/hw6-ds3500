@@ -1,43 +1,42 @@
-# CCP Investigation Project
+# Textastic: Analyzing Political Bias in AI Text Generation
 
-This repository contains work for the CCP (Content Comprehension and Processing) investigation, which is the primary focus of this project. The repository is organized into several directories, each with a specific purpose.
+## Overview
+This project investigates bias in AI-generated descriptions of the Chinese Communist Party (CCP) using a custom text analysis framework. By comparing LLM outputs (Claude, DeepSeek, OpenAI) against reference sources (Wikipedia, Chinese Government, American Government), we quantify how AI-generated content aligns with different political perspectives.
 
 ## Repository Structure
 
-### ccp_investigation/
+- **CCP Investigation** (main focus): Measures how LLM outputs compare to neutral, pro-China, and anti-China reference texts
+- **Starter Code**: Initial framework implementation 
+- **Ideation**: Brainstorming materials
+- **MVP**: Minimal viable product
 
-The main project folder containing the core content comprehension and processing implementation:
+## Key Features
 
-- **__pycache__/**: Python cache files
-- **ccp_analysis_output/**: Output data from content analysis runs
-- **ccp_documents/**: Source documents for processing
-- **script.py**: Main processing script
-- **stop_words_ccp.txt**: Custom stopwords list for text processing
-- **textastic_app.py**: Application interface for the text processing system
-- **textastic_parsers.py**: Document parsing modules
-- **textastic.py**: Core functionality for text analysis
+- **Custom NLP Implementation**
+  - TF-IDF vectorization built from scratch
+  - Cosine similarity calculation
+  - Stop words filtering
+  - Political terminology analysis
 
-### Supporting Directories
+- **Visualizations**
+  - Similarity heatmaps between LLMs and reference sources
+  - Bias distribution charts
+  - Term usage analysis
 
-The repository also includes these additional resources:
+## Usage
 
-- **first_mvp_investigation/**: Initial MVP implementation and testing
-- **ideation/**: Brainstorming documents and concept development
-- **starter_code/**: Base code templates and examples
+```
+python textastic_app.py
+```
 
-## Getting Started
+Requires: Python 3.6+, NumPy, Matplotlib
 
-To use the CCP investigation tools:
+## Files
 
-1. Clone this repository
-2. Navigate to the `ccp_investigation` directory
-3. Run `python textastic_app.py` to start the application
+- `textastic.py`: Core analysis framework
+- `textastic_app.py`: Application driver
+- `textastic_parsers.py`: Custom document parsers
+- `stop_words_ccp.txt`: Stop words list
 
-## About the Project
-
-The CCP investigation focuses on developing advanced techniques for analyzing and processing textual content. This implementation provides tools for document parsing, content analysis, and insight extraction.
-
-## Dependencies
-
-- Python 3.7+
-- See `requirements.txt` for additional dependencies
+## Extending
+The framework is modular by design - add parsers for new document types or implement additional analysis methods in the Textastic class.
