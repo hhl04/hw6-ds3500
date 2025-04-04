@@ -1,0 +1,14 @@
+Our Journey
+
+picking an idea:
+- run local & cloud models
+- search agents
+- context windows
+- how to truly measure intelligence...?
+- narrowing scope to just output text
+
+- pivoting to search agents as well to examine company bias in the design of their products/agents
+
+- specific topic: China vs US LLMS
+- racial bias
+- final vote: roe v wade ; because of context

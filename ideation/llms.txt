@@ -1,0 +1,17 @@
+REASONING
+
+gemini-2.5-pro-experimental
+o3-mini-high
+sonnet-3.7-thinking
+deepseek-r1
+qwq-32b
+r1-1776-search
+grok-3-reasoning
+
+NON-REASONING
+deepseek-v3
+gpt-4.5
+gpt-4o
+gemini-2.0-flash
+grok-3-non-reasoning
+phi-4
