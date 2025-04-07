@@ -8,6 +8,7 @@ across different topics on a political spectrum.
 from CapTuring import CapTuring, StopWordsNotFoundError
 import os
 
+# *** CD to a parent folder i.e. investigation_3_new_modularized ***
 # *** CHANGE ONLY THIS LINE TO SWITCH TOPICS ***
 TOPIC = "tariffs"  # Options: "ccp", "roe_vs_wade", etc.
 
