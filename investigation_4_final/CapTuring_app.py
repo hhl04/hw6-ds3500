@@ -10,7 +10,7 @@ import os
 import matplotlib.pyplot as plt
 
 # *** CHANGE ONLY THIS LINE TO SWITCH TOPICS ***
-TOPIC = "ccp"  # Options: "ccp", "roe_vs_wade", etc.
+TOPIC = "tariffs"  # Options: "ccp", "roe_vs_wade", etc.
 
 
 def discover_human_perspectives(topic_path):
@@ -72,7 +72,7 @@ def discover_llm_sources(topic_path):
     return llm_sources
 
 
-def load_stop_words(topic):
+def get_stop_words_path(topic):
     """Load stop words for the given topic
     
     Args:
@@ -106,9 +106,10 @@ def main():
     """Main function to run the NLP analysis"""
     # Get topic path
     topic_path = os.path.join("documents", TOPIC)
-
+    
     # Load stop words and initialize analyzer
-    stop_words_path = load_stop_words(TOPIC)
+    stop_words_path = get_stop_words_path(TOPIC)
+    
     analyzer = CapTuring()
     if not os.path.exists(topic_path):
         print(f"Error: Topic folder '{topic_path}' not found")
