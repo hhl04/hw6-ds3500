@@ -235,6 +235,7 @@ class CapTuring:
             return None
 
     def get_most_similar_documents(self, doc_label, n=5):
+        
         """Find most similar documents to a given document"""
         sim_matrix, labels = self.calculate_similarity_matrix()
         
@@ -253,6 +254,7 @@ class CapTuring:
                 
         return similar_docs[:n]
     def get_baseline_documents(self, **kwargs):
+        
         """Get all baseline documents
         
         Args:
@@ -277,6 +279,7 @@ class CapTuring:
             
         return self.baselines.copy()
     def calculate_document_positions(self, baseline_types=None):
+        
         """Calculate document positions relative to baselines"""
         # Use all baselines if none specified
         if baseline_types is None:
