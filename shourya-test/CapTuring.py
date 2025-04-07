@@ -23,8 +23,9 @@ class CapTuring:
         self.vectorizer = None  # TF-IDF vectorizer
         self.similarity_matrix = None  # Store cosine similarity matrix
         self.baseline_docs = []  # List of baseline documents (e.g., human articles)
+        self.document_categories = {}  # Store document categories (e.g., CCP, Western)
     
-    def load_document(self, filepath, label=None, parser=None):
+    def load_document(self, filepath, label=None, parser=None, category=None):
         """
         Load a document from a file and store its content.
         
@@ -32,6 +33,7 @@ class CapTuring:
             filepath (str): Path to the document file
             label (str, optional): Label for the document. If None, uses filename
             parser (function, optional): Custom parser function. If None, uses default parser
+            category (str, optional): Category of the document (e.g., 'CCP', 'Western')
         
         Returns:
             bool: True if document was loaded successfully, False otherwise
@@ -51,6 +53,10 @@ class CapTuring:
         
         # Store raw text
         self.documents[label] = results['text']
+        
+        # Store document category if provided
+        if category:
+            self.document_categories[label] = category
         
         # Store processed data
         for k, v in results.items():
@@ -107,16 +113,21 @@ class CapTuring:
         text = re.sub(r'\s+', ' ', text).strip()
         return text
     
-    def set_baseline_documents(self, doc_labels):
+    def set_baseline_documents(self, doc_labels, categories=None):
         """
         Set baseline documents for comparison (e.g., human-written articles).
         
         Args:
             doc_labels (list): List of document labels to use as baselines
+            categories (list, optional): List of categories for each baseline document
         """
-        for label in doc_labels:
+        self.baseline_docs = []
+        for i, label in enumerate(doc_labels):
             if label in self.documents:
                 self.baseline_docs.append(label)
+                # Store category if provided
+                if categories and i < len(categories):
+                    self.document_categories[label] = categories[i]
             else:
                 print(f"Warning: Baseline document '{label}' not found in loaded documents.")
     
@@ -140,7 +151,7 @@ class CapTuring:
         self.tfidf_matrix = self.vectorizer.fit_transform(doc_texts)
         
         # Store document labels for reference
-        self.data['doc_labels'] = doc_labels
+        self.data['doc_labels'] = {i: label for i, label in enumerate(doc_labels)}
         
         return self.tfidf_matrix
     
@@ -252,14 +263,14 @@ class CapTuring:
         
         return fig
     
-    def visualize_political_spectrum(self, doc_labels=None, figsize=(12, 6)):
+    def visualize_political_spectrum(self, doc_labels=None, figsize=(12, 6), spectrum_labels=None):
         """
         Visualize documents on a political spectrum based on similarity to baseline documents.
-        Assumes first baseline is 'left/progressive' and second is 'right/conservative'.
         
         Args:
             doc_labels (list, optional): List of document labels to visualize. If None, uses all non-baseline docs
             figsize (tuple): Figure size (width, height)
+            spectrum_labels (tuple, optional): Custom labels for spectrum ends (left, right)
             
         Returns:
             matplotlib.figure.Figure: The created figure
@@ -299,88 +310,187 @@ class CapTuring:
         
         # Plot each document on the spectrum
         y_positions = np.linspace(0.1, 0.9, len(political_scores))
+        
+        # Use different markers/colors for different document categories
+        markers = {'CCP': 'o', 'Western': 's', None: '^'}
+        colors = {'CCP': 'red', 'Western': 'blue', None: 'green'}
+        
         for i, (doc, score) in enumerate(political_scores.items()):
-            ax.scatter(score, y_positions[i], s=100, label=doc)
+            category = self.document_categories.get(doc)
+            marker = markers.get(category, '^')
+            color = colors.get(category, 'green')
+            
+            ax.scatter(score, y_positions[i], s=100, marker=marker, 
+                      color=color, label=f"{doc} ({category})" if category else doc)
             ax.annotate(doc, (score, y_positions[i]), xytext=(5, 0), 
                        textcoords='offset points', va='center')
         
         # Add labels for the spectrum ends
-        ax.text(-0.95, -0.05, f"More similar to {left_baseline}\n(Progressive/Left)", 
-                ha='left', va='top', fontsize=10)
-        ax.text(0.95, -0.05, f"More similar to {right_baseline}\n(Conservative/Right)", 
-                ha='right', va='top', fontsize=10)
+        left_label = f"More similar to {left_baseline}"
+        right_label = f"More similar to {right_baseline}"
         
-        ax.set_title('Document Political Spectrum Analysis')
+        if spectrum_labels:
+            left_label += f"\n({spectrum_labels[0]})"
+            right_label += f"\n({spectrum_labels[1]})"
+        else:
+            left_label += "\n(Progressive/Left)"
+            right_label += "\n(Conservative/Right)"
+            
+        ax.text(-0.95, -0.05, left_label, ha='left', va='top', fontsize=10)
+        ax.text(0.95, -0.05, right_label, ha='right', va='top', fontsize=10)
+        
+        # Add legend for categories
+        handles, labels = [], []
+        for cat, marker in markers.items():
+            if cat and any(self.document_categories.get(doc) == cat for doc in doc_labels):
+                handles.append(plt.Line2D([0], [0], marker=marker, color=colors[cat],
+                                         linestyle='None', markersize=10))
+                labels.append(cat)
+        
+        if handles:
+            ax.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.5, -0.15), 
+                     ncol=len(handles))
+        
+        ax.set_title('Document Spectrum Analysis')
         ax.set_yticks([])
         ax.grid(True, linestyle='--', alpha=0.3)
         
         fig.tight_layout()
         return fig
     
-    def get_top_terms(self, doc_label, n=10):
+    def compare_document_categories(self, category1, category2, n=10, figsize=(12, 8)):
         """
-        Get the top N most important terms for a document based on TF-IDF scores.
+        Compare the most distinctive terms between two document categories.
         
         Args:
-            doc_label (str): Label of the document
-            n (int): Number of top terms to return
-            
-        Returns:
-            list: List of (term, score) tuples for top terms
-        """
-        if self.vectorizer is None or self.tfidf_matrix is None:
-            self.compute_tfidf()
-            if self.tfidf_matrix is None:
-                return []
-        
-        # Get document index
-        doc_labels = self.data['doc_labels']
-        if doc_label not in doc_labels:
-            print(f"Error: Document '{doc_label}' not found.")
-            return []
-        
-        doc_idx = doc_labels.index(doc_label)
-        
-        # Get feature names and TF-IDF scores
-        feature_names = np.array(self.vectorizer.get_feature_names_out())
-        tfidf_scores = self.tfidf_matrix[doc_idx].toarray().flatten()
-        
-        # Get indices of top terms
-        top_indices = tfidf_scores.argsort()[-n:][::-1]
-        
-        # Return top terms and their scores
-        return [(feature_names[i], tfidf_scores[i]) for i in top_indices]
-    
-    def visualize_word_importance(self, doc_label, n=10, figsize=(10, 6)):
-        """
-        Visualize the most important words in a document based on TF-IDF scores.
-        
-        Args:
-            doc_label (str): Label of the document
-            n (int): Number of top terms to visualize
+            category1 (str): First document category to compare
+            category2 (str): Second document category to compare
+            n (int): Number of top distinctive terms to show
             figsize (tuple): Figure size (width, height)
             
         Returns:
             matplotlib.figure.Figure: The created figure
         """
-        top_terms = self.get_top_terms(doc_label, n)
-        if not top_terms:
+        if not self.document_categories:
+            print("Error: No document categories defined.")
             return None
+            
+        # Get documents for each category
+        cat1_docs = [label for label, cat in self.document_categories.items() if cat == category1]
+        cat2_docs = [label for label, cat in self.document_categories.items() if cat == category2]
         
-        # Extract terms and scores
-        terms, scores = zip(*top_terms)
+        if not cat1_docs or not cat2_docs:
+            print(f"Error: Not enough documents for categories {category1} and {category2}.")
+            return None
+            
+        # Ensure TF-IDF is computed
+        if self.vectorizer is None:
+            self.compute_tfidf()
+            
+        # Get document indices
+        doc_labels = self.data['doc_labels']
+        cat1_indices = [doc_labels.index(doc) for doc in cat1_docs if doc in doc_labels]
+        cat2_indices = [doc_labels.index(doc) for doc in cat2_docs if doc in doc_labels]
+        
+        if not cat1_indices or not cat2_indices:
+            return None
+            
+        # Get average TF-IDF scores for each category
+        feature_names = np.array(self.vectorizer.get_feature_names_out())
+        cat1_tfidf = np.mean([self.tfidf_matrix[i].toarray().flatten() for i in cat1_indices], axis=0)
+        cat2_tfidf = np.mean([self.tfidf_matrix[i].toarray().flatten() for i in cat2_indices], axis=0)
+        
+        # Calculate difference in importance
+        diff_scores = cat1_tfidf - cat2_tfidf
+        
+        # Get top terms for each category
+        cat1_top_indices = diff_scores.argsort()[-n:][::-1]
+        cat2_top_indices = diff_scores.argsort()[:n]
+        
+        cat1_terms = [(feature_names[i], diff_scores[i]) for i in cat1_top_indices]
+        cat2_terms = [(feature_names[i], -diff_scores[i]) for i in cat2_top_indices]
+        
+        # Create visualization
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=figsize)
+        
+        # Plot for category 1
+        terms1, scores1 = zip(*cat1_terms)
+        y_pos1 = np.arange(len(terms1))
+        ax1.barh(y_pos1, scores1, align='center', color='blue')
+        ax1.set_yticks(y_pos1)
+        ax1.set_yticklabels(terms1)
+        ax1.invert_yaxis()
+        ax1.set_xlabel('Relative Importance')
+        ax1.set_title(f'Top Terms Distinctive to {category1}')
+        
+        # Plot for category 2
+        terms2, scores2 = zip(*cat2_terms)
+        y_pos2 = np.arange(len(terms2))
+        ax2.barh(y_pos2, scores2, align='center', color='red')
+        ax2.set_yticks(y_pos2)
+        ax2.set_yticklabels(terms2)
+        ax2.invert_yaxis()
+        ax2.set_xlabel('Relative Importance')
+        ax2.set_title(f'Top Terms Distinctive to {category2}')
+        
+        fig.suptitle(f'Comparison of Distinctive Terms: {category1} vs {category2}')
+        fig.tight_layout()
+        
+        return fig
+    
+    def visualize_word_importance(self, doc_label, n=20, figsize=(12, 8)):
+        """
+        Visualize the most important words for a specific document based on TF-IDF scores.
+        
+        Args:
+            doc_label (str): Label of the document to analyze
+            n (int): Number of top words to display
+            figsize (tuple): Figure size (width, height)
+            
+        Returns:
+            matplotlib.figure.Figure: The created figure or None if document not found
+        """
+        if doc_label not in self.documents:
+            print(f"Error: Document '{doc_label}' not found.")
+            return None
+            
+        if self.tfidf_matrix is None:
+            self.compute_tfidf()
+            if self.tfidf_matrix is None:
+                return None
+                
+        # Get document index
+        doc_labels = self.data['doc_labels']
+        if doc_label not in doc_labels:
+            print(f"Error: Document '{doc_label}' not found in TF-IDF matrix.")
+            return None
+            
+        doc_index = doc_labels.index(doc_label)
+        
+        # Get feature names and TF-IDF scores for this document
+        feature_names = np.array(self.vectorizer.get_feature_names_out())
+        tfidf_scores = self.tfidf_matrix[doc_index].toarray().flatten()
+        
+        # Get top words by TF-IDF score
+        top_indices = tfidf_scores.argsort()[-n:][::-1]
+        top_words = feature_names[top_indices]
+        top_scores = tfidf_scores[top_indices]
         
         # Create visualization
         fig, ax = plt.subplots(figsize=figsize)
-        y_pos = np.arange(len(terms))
         
-        # Create horizontal bar chart
-        ax.barh(y_pos, scores, align='center')
+        y_pos = np.arange(len(top_words))
+        ax.barh(y_pos, top_scores, align='center')
         ax.set_yticks(y_pos)
-        ax.set_yticklabels(terms)
+        ax.set_yticklabels(top_words)
         ax.invert_yaxis()  # Labels read top-to-bottom
         ax.set_xlabel('TF-IDF Score')
-        ax.set_title(f'Top {n} Important Terms in {doc_label}')
+        ax.set_title(f'Top {n} Important Words in {doc_label}')
         
+        # Add category information if available
+        category = self.document_categories.get(doc_label)
+        if category:
+            ax.set_title(f'Top {n} Important Words in {doc_label} (Category: {category})')
+            
         fig.tight_layout()
         return fig
