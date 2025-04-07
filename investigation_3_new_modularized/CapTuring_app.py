@@ -10,7 +10,7 @@ import os
 
 # *** CD to a parent folder i.e. investigation_3_new_modularized ***
 # *** CHANGE ONLY THIS LINE TO SWITCH TOPICS ***
-TOPIC = "tariffs"  # Options: "ccp", "roe_vs_wade", etc.
+TOPIC = "ccp"  # Options: "ccp", "roe_vs_wade", "tariffs".
 
 
 def load_stop_words(topic):
