@@ -908,16 +908,20 @@ class CapTuring:
         
     def visualize_all_analyses(self):
         """Run all core visualizations sequentially for comprehensive analysis"""
-        print("1. Political Bias Distribution...")
+
+        print("1. Word Frequency Comparison...")
+        self.wordcount_sankey()
+
+        print("\n2. Political Bias Distribution...")
         self.visualize_political_bias_distribution()
         
-        print("\n2. Political Compass...")
+        print("\n3. Political Compass...")
         self.visualize_political_compass()
         
-        print("\n3. Politically Distinctive Words...")
+        print("\n4. Politically Distinctive Words...")
         self.visualize_key_word_comparison()
         
-        print("\n4. Political Consistency Analysis...")
+        print("\n5. Political Consistency Analysis...")
         self.visualize_consistency_across_documents()
         
         print("\nAnalysis visualizations complete!")
@@ -979,3 +983,93 @@ class CapTuring:
             print(f"Exported {len(self.stop_words)} stop words to {filename}")
         except Exception as e:
             print(f"Error exporting stop words to {filename}: {e}")
+
+    def wordcount_sankey(self, word_list=None, k=5, figsize=(16, 10)):
+        """Create a Sankey diagram mapping texts to their most frequent words
+        
+        Args:
+            word_list (list, optional): Specific words to include in the visualization
+            k (int): Number of top words to include from each document if word_list not provided
+            figsize (tuple): Figure size
+            
+        Returns:
+            None: Displays the Sankey diagram
+        """
+        try:
+            import plotly.graph_objects as go
+            from plotly.offline import iplot, init_notebook_mode
+        except ImportError:
+            print("This visualization requires plotly. Install with: pip install plotly")
+            return
+            
+        # Check if we have word count data
+        if not self.data['wordcount']:
+            print("No word count data available")
+            return
+            
+        # Get document labels
+        doc_labels = list(self.data['wordcount'].keys())
+        
+        # If no specific word list is provided, find top k words from each document
+        if word_list is None:
+            # Get top words from each document (excluding stop words)
+            all_top_words = set()
+            for label in doc_labels:
+                word_counts = self.data['wordcount'][label]
+                # Filter out stop words
+                filtered_counts = {word: count for word, count in word_counts.items() 
+                                  if word.lower() not in self.stop_words}
+                # Get top k words
+                top_words = sorted(filtered_counts.items(), key=lambda x: x[1], reverse=True)[:k]
+                all_top_words.update([word for word, _ in top_words])
+                
+            word_list = sorted(all_top_words)
+        
+        # Prepare Sankey diagram data
+        source = []  # Document indices
+        target = []  # Word indices (offset by number of documents)
+        value = []   # Word counts
+        
+        # Create mapping for node labels
+        node_labels = doc_labels + word_list
+        doc_idx_map = {doc: i for i, doc in enumerate(doc_labels)}
+        word_idx_offset = len(doc_labels)  # Words start after documents
+        
+        # Create links between documents and words
+        for doc_label in doc_labels:
+            word_counts = self.data['wordcount'][doc_label]
+            doc_idx = doc_idx_map[doc_label]
+            
+            # Add connections for each word in word_list that appears in this document
+            for word_idx, word in enumerate(word_list):
+                if word in word_counts and word_counts[word] > 0:
+                    source.append(doc_idx)
+                    target.append(word_idx + word_idx_offset)
+                    value.append(word_counts[word])
+        
+        # Create the Sankey diagram
+        fig = go.Figure(data=[go.Sankey(
+            node=dict(
+                pad=15,
+                thickness=20,
+                line=dict(color="black", width=0.5),
+                label=node_labels,
+                color=["rgba(31, 119, 180, 0.8)"] * len(doc_labels) + ["rgba(255, 127, 14, 0.8)"] * len(word_list)
+            ),
+            link=dict(
+                source=source,
+                target=target,
+                value=value
+            )
+        )])
+        
+        # Update layout
+        fig.update_layout(
+            title_text="Document-Word Connections (link width = word frequency)",
+            font_size=12,
+            width=figsize[0]*100,  # Convert to pixels
+            height=figsize[1]*100  # Convert to pixels
+        )
+        
+        # Show the figure
+        fig.show()
