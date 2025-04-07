@@ -984,6 +984,72 @@ class CapTuring:
         except Exception as e:
             print(f"Error exporting stop words to {filename}: {e}")
 
+    def _filter_word_counts(self, word_counts, min_word_length=3, exclude_numbers=True, 
+                            exclude_common=True, additional_excluded=None):
+        """Helper function to filter word counts for visualizations
+        
+        Args:
+            word_counts (dict): Dictionary of word counts
+            min_word_length (int): Minimum word length to include
+            exclude_numbers (bool): Whether to exclude words that are numbers
+            exclude_common (bool): Whether to exclude common meaningless words
+            additional_excluded (list): Additional specific words to exclude
+            
+        Returns:
+            dict: Filtered word counts
+        """
+        # Common words to exclude (days, months, reporting verbs, etc.)
+        common_excluded = set()
+        
+        if exclude_common:
+            common_excluded = {
+                # General reporting words
+                'said', 'says', 'say', 'said', 'told', 'new', 'according', 'reported',
+                
+                # Time references
+                'today', 'yesterday', 'tomorrow', 'now', 'year', 'years', 'month', 'months',
+                'week', 'weeks', 'day', 'days', 'time', 'times',
+                
+                # Days of the week
+                'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday',
+                
+                # Months
+                'january', 'february', 'march', 'april', 'may', 'june', 'july', 
+                'august', 'september', 'october', 'november', 'december',
+                
+                # Common verbs and articles that might get through
+                'get', 'got', 'getting', 'take', 'took', 'taken', 'taking',
+                'make', 'made', 'making', 'use', 'used', 'using', 'like',
+            }
+        
+        # Build a complete set of words to exclude
+        words_to_exclude = set(self.stop_words) | common_excluded
+        
+        # Add any additional words to exclude
+        if additional_excluded:
+            words_to_exclude |= set(w.lower() for w in additional_excluded)
+        
+        # Apply all filters to create filtered counts
+        filtered_counts = {}
+        for word, count in word_counts.items():
+            word_lower = word.lower()
+            
+            # Skip if word is in exclusion list
+            if word_lower in words_to_exclude:
+                continue
+                
+            # Skip if word is too short
+            if len(word_lower) < min_word_length:
+                continue
+                
+            # Skip if word is a number and we're excluding numbers
+            if exclude_numbers and word_lower.isdigit():
+                continue
+                
+            filtered_counts[word] = count
+                
+        return filtered_counts
+
     def wordcount_sankey(self, word_list=None, k=5, figsize=(16, 10)):
         """Create a Sankey diagram mapping texts to their most frequent words
         
@@ -1012,13 +1078,14 @@ class CapTuring:
         
         # If no specific word list is provided, find top k words from each document
         if word_list is None:
-            # Get top words from each document (excluding stop words)
+            # Get top words from each document (using advanced filtering)
             all_top_words = set()
             for label in doc_labels:
                 word_counts = self.data['wordcount'][label]
-                # Filter out stop words
-                filtered_counts = {word: count for word, count in word_counts.items() 
-                                  if word.lower() not in self.stop_words}
+                
+                # Apply advanced filtering
+                filtered_counts = self._filter_word_counts(word_counts)
+                
                 # Get top k words
                 top_words = sorted(filtered_counts.items(), key=lambda x: x[1], reverse=True)[:k]
                 all_top_words.update([word for word, _ in top_words])
