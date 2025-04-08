@@ -1,0 +1,43 @@
+Okay, put on your reading glasses, grab a metaphorical cup of coffee. Here’s the story on *Roe v. Wade*, one of the most pivotal and fiercely debated Supreme Court cases in American history.
+
+*( WASHINGTON D.C.)*
+
+For nearly half a century, the name *Roe v. Wade* was synonymous with abortion rights in the United States. Decided on January 22, 1973, this landmark Supreme Court ruling fundamentally altered the legal landscape surrounding reproductive healthcare, establishing a woman's constitutional right to an abortion, though not without limitations.
+
+**The Heart of the Case:**
+
+The case began in Texas, where abortion was illegal except to save a mother's life. A woman known by the pseudonym "Jane Roe" (later identified as Norma McCorvey) challenged this law, arguing it violated her constitutional rights. Her case was brought against Henry Wade, the Dallas County District Attorney responsible for enforcing the statute.
+
+Roe's legal team argued that the decision whether or not to terminate a pregnancy fell under a fundamental "right to privacy," which, while not explicitly listed in the Constitution, was protected under the Due Process Clause of the Fourteenth Amendment. This clause prevents states from depriving any person of "life, liberty, or property, without due process of law," and the Court had previously interpreted "liberty" to include certain personal privacy rights.
+
+**The Supreme Court's Decision (1973):**
+
+In a 7-2 decision, the Supreme Court agreed with Roe. The majority opinion, authored by Justice Harry Blackmun, held that the right to privacy was indeed "broad enough to encompass a woman's decision whether or not to terminate her pregnancy."
+
+However, the Court didn't grant an absolute right. It established a framework based on the trimesters of pregnancy:
+
+1.  **First Trimester:** The state could not regulate abortion at all, leaving the decision solely between a woman and her physician.
+2.  **Second Trimester:** The state could implement regulations reasonably related to maternal health.
+3.  **Third Trimester:** Once the fetus reached "viability" (the point at which it could potentially survive outside the womb, typically considered around the start of the third trimester), the state could regulate and even prohibit abortions, except when necessary to save the life or health of the mother.
+
+**The Impact and Controversy:**
+
+*Roe v. Wade* instantly invalidated restrictive abortion laws in many states and sparked decades of intense political, social, and moral debate. It became a cornerstone for women's rights advocates, who saw it as essential for bodily autonomy and equality. Conversely, it mobilized opponents who believe abortion constitutes the taking of a human life and violates moral or religious principles.
+
+Subsequent Supreme Court decisions, notably *Planned Parenthood v. Casey* (1992), modified the trimester framework but reaffirmed *Roe's* central holding – that women have a constitutional right to abortion before fetal viability. *Casey* introduced the "undue burden" standard, allowing states to enact regulations as long as they didn't place a substantial obstacle in the path of a woman seeking an abortion.
+
+**The Overturning (2022):**
+
+The legal landscape shifted dramatically on June 24, 2022. In the case of *Dobbs v. Jackson Women's Health Organization*, the Supreme Court, in a 6-3 decision, explicitly overturned both *Roe v. Wade* and *Planned Parenthood v. Casey*.
+
+The majority opinion argued that the Constitution makes no specific reference to abortion and that such a right is not implicitly protected by any constitutional provision, including the Due Process Clause of the Fourteenth Amendment. The Court stated that the authority to regulate or prohibit abortion was being returned "to the people and their elected representatives."
+
+**The Post-Roe Era:**
+
+The *Dobbs* decision did not outlaw abortion nationwide; instead, it eliminated the federal constitutional standard. This immediately triggered pre-existing "trigger laws" in several states, banning or severely restricting abortion access. Other states moved quickly to enact new restrictions, while others took steps to protect abortion rights within their borders.
+
+The result is a rapidly evolving patchwork of state laws, creating vast disparities in abortion access across the country. The debate over abortion rights, far from being settled, has now shifted primarily to state legislatures, courts, and ballot initiatives, remaining one of the most divisive issues in American public life.
+
+So, while *Roe v. Wade* defined the legal status of abortion for nearly 50 years, its overturning in 2022 marked the beginning of a new, uncertain chapter in this long and deeply felt national controversy.
+
+*(End Report)*
