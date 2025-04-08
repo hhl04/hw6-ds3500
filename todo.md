@@ -44,3 +44,24 @@ The assignment suggests a specific dictionary-within-dictionary structure for th
 You've identified exactly the correct areas which have not been implemented in the code yet. 
 
 Please write a new BOTTOM section that concisely explains what's missing, both broadly and/or specifically.
+
+ It would be nice to be able to edit one additional line in the app file, which will make the entire investigation go from grouped by folder to individual, per LLM file analysis. 
+
+
+8. **Linguistic Complexity Comparison**
+   - Because some political positions might systematically use simpler/complex language
+
+9. **Certainty Language Analysis**
+   - Because some political positions or LLM responses might use more uncertain language.
+
+10. **Sentiment Trajectory**
+    - Line charts showing emotional tone changes throughout the progression of each txt document
+    - Overlaid comparison of sentiment patterns by political position
+
+11. **Topic Distribution Comparison**
+    - Automatically extracted topics using LDA with top terms labeled
+    - Topic prevalence normalized as percentage of document content
+
+12. **2D PCA Visualization**
+
+13. **3D PCA Visualization**
