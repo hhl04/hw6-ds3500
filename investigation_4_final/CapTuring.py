@@ -650,8 +650,8 @@ class CapTuring:
         """Create a Sankey diagram showing word flows between documents
         
         Args:
-            word_list: List of specific words to include (default: None, uses words with count >= k)
-            k: Minimum word count to include a word (default: 5)
+            word_list: List of specific words to include (default: None, uses words with total frequency >= k)
+            k: Minimum total frequency across all documents to include a word (default: 5)
             **kwargs: Additional options for customization
         """
         try:
@@ -675,15 +675,16 @@ class CapTuring:
                     counts = {word: count for word, count in self.data['wordcount'][label].items() 
                              if word not in exclude_words}
                     word_counts[label] = counts
-                
-        # Build word list from words with count >= k if not provided
+        
+        # Build word list from words with total frequency >= k if not provided
         if word_list is None:
-            word_list = set()
+            # Calculate total frequency for each word across all documents
+            total_word_counts = Counter()
             for label, counts in word_counts.items():
-                # Get words with count >= k
-                filtered_words = [word for word, count in counts.items() if count >= k]
-                word_list.update(filtered_words)
-            word_list = list(word_list)
+                total_word_counts.update(counts)
+            
+            # Filter words by total frequency across all documents
+            word_list = [word for word, count in total_word_counts.items() if count >= k]
         
         # Create Sankey data
         sources = []
