@@ -224,7 +224,7 @@ def main():
     # 1. Sankey diagram visualization
     print("\n1. Word Count Sankey Diagram:")
     analyzer.wordcount_sankey(
-        k=10,
+        k=30,
         title=f"Word Distribution Across {TOPIC.upper()} Documents",
         show=True,
         highlight_baselines=True,
