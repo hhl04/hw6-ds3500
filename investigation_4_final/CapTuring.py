@@ -357,7 +357,6 @@ class CapTuring:
             print("This visualization requires matplotlib. Install with: pip install matplotlib")
             return None
             
-        # Get document labels
         doc_labels = kwargs.get('document_labels', list(self.documents.keys()))
         
         # Define features to compare (need exactly 3 for 3D plot)
@@ -384,7 +383,6 @@ class CapTuring:
         valid_labels = []
         
         for label in doc_labels:
-            # Check if all three features exist for this document
             valid = True
             feature_values = []
             
@@ -406,40 +404,28 @@ class CapTuring:
         y_data = np.array(y_data)
         z_data = np.array(z_data)
         
-        # Determine colors based on metadata grouping if specified
-        colors = None
-        group_by = kwargs.get('group_by_metadata')
+        # Generate random colors for each point
+        import matplotlib.colors as mcolors
+        import random
         
-        if group_by and 'metadata' in self.data:
-            # Extract groups from metadata
-            groups = []
-            for label in valid_labels:
-                if label in self.data['metadata'] and group_by in self.data['metadata'][label]:
-                    groups.append(self.data['metadata'][label][group_by])
-                else:
-                    groups.append('unknown')
-            
-            # Create color map
-            unique_groups = list(set(groups))
-            color_map = {group: i for i, group in enumerate(unique_groups)}
-            colors = [color_map[group] for group in groups]
-            
-            # Create legend handles
-            from matplotlib.lines import Line2D
-            cmap = plt.cm.tab10
-            legend_elements = [
-                Line2D([0], [0], marker='o', color='w', 
-                       markerfacecolor=cmap(color_map[group] % 10), 
-                       markersize=10, label=group)
-                for group in unique_groups
-            ]
+        # Create a colormap with distinct colors
+        color_list = list(mcolors.TABLEAU_COLORS.values())
+        colors = [random.choice(color_list) for _ in range(len(valid_labels))]
         
-        # Plot the scatter points
-        scatter = ax.scatter(x_data, y_data, z_data, c=colors, cmap='tab10', s=100, alpha=0.7)
+        # Plot the scatter points with distinct colors
+        scatter = ax.scatter(x_data, y_data, z_data, c=colors, s=100, alpha=0.7)
 
         # Add labels for each point
         for i, label in enumerate(valid_labels):
             ax.text(x_data[i], y_data[i], z_data[i], label, size=8)
+
+        # Add legend for each point
+        legend_elements = [plt.Line2D([0], [0], marker='o', color='w', 
+                          markerfacecolor=colors[i], markersize=10, label=valid_labels[i])
+                          for i in range(len(valid_labels))]
+        
+        # Add the legend to the plot
+        ax.legend(handles=legend_elements, loc='upper right', bbox_to_anchor=(1.1, 1.0))
 
         # Set axis labels
         ax.set_xlabel(features[0].replace('_', ' ').title())
@@ -449,29 +435,6 @@ class CapTuring:
         # Add title
         title = kwargs.get('title', '3D Feature Comparison of Documents')
         ax.set_title(title)
-
-        # Add legend if we have groups
-        if colors is not None:
-            # Create legend directly from the scatter plot
-            unique_groups = list(set(groups))
-            legend_handles = []
-            legend_labels = []
-            
-            for group in unique_groups:
-                group_indices = [i for i, g in enumerate(groups) if g == group]
-                if group_indices:
-                    # Use the first point of each group for the legend
-                    idx = group_indices[0]
-                    legend_handles.append(
-                        plt.Line2D([0], [0], 
-                                  marker='o', 
-                                  color='w',
-                                  markerfacecolor=plt.cm.tab10(color_map[group] % 10), 
-                                  markersize=10)
-                    )
-                    legend_labels.append(group)
-            
-            ax.legend(legend_handles, legend_labels, loc='upper right', bbox_to_anchor=(1.1, 1.0))
 
         # Add grid
         ax.grid(True)
