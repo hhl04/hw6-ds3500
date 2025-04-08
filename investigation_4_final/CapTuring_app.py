@@ -10,8 +10,7 @@ import os
 import matplotlib.pyplot as plt
 
 # *** CHANGE ONLY THIS LINE TO SWITCH TOPICS ***
-TOPIC = "tariffs"  # Options: "ccp", "roe_vs_wade", etc.
-
+TOPIC = "roe_vs_wade"  # Options: "ccp", "roe_vs_wade", etc.
 
 def discover_human_perspectives(topic_path):
     """Discover available human perspectives for the topic
@@ -225,7 +224,7 @@ def main():
     # 1. Sankey diagram visualization
     print("\n1. Word Count Sankey Diagram:")
     analyzer.wordcount_sankey(
-        k=20,
+        k=30,
         title=f"Word Distribution Across {TOPIC.upper()} Documents",
         show=True,
         highlight_baselines=True,
@@ -235,6 +234,7 @@ def main():
             'center': 'rgba(44, 160, 44, 0.8)',     # Green for center
         }
     )
+    
     # 2. Document features subplots
     print("\n2. Document Features Subplots:")
     analyzer.visualize_text_features(
@@ -247,7 +247,16 @@ def main():
     analyzer.visualize_comparative_features(
         title=f"Comparative Analysis of {TOPIC.upper()} Documents",
         normalize=True,
-        features=['numwords', 'unique_words', 'avg_word_length', 'lexical_diversity', 'avg_sentence_length']
+        features=['numwords','unique_words', 'avg_word_length', 'lexical_diversity', 'avg_sentence_length']
+    )
+    
+    # 4. 3D Feature visualization
+    print("\n4. 3D Feature Comparison:")
+    analyzer.visualize_3d_features(
+        title=f"3D Feature Comparison - {TOPIC.upper()}",
+        features=['avg_word_length', 'lexical_diversity', 'avg_sentence_length'],
+        group_by_metadata='group',  # Change from 'type' to 'group'
+        figsize=(12, 10)
     )
     
     print("\nAnalysis complete!")

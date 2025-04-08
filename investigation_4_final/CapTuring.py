@@ -334,6 +334,155 @@ class CapTuring:
             
         return features
 
+    def visualize_3d_features(self, **kwargs):
+        """Create a 3D scatter plot comparing documents on three features
+        
+        Args:
+            **kwargs: Additional options including:
+                - document_labels: List of document labels to include (default: all documents)
+                - features: List of three features to plot (default: numwords, lexical_diversity, avg_sentence_length)
+                - title: Plot title
+                - figsize: Figure size as (width, height) tuple
+                - show: Whether to display the plot (default: True)
+                - group_by_metadata: Metadata field to group documents by for coloring (default: None)
+                
+        Returns:
+            matplotlib Figure object
+        """
+        try:
+            import matplotlib.pyplot as plt
+            from mpl_toolkits.mplot3d import Axes3D
+            import numpy as np
+        except ImportError:
+            print("This visualization requires matplotlib. Install with: pip install matplotlib")
+            return None
+            
+        # Get document labels
+        doc_labels = kwargs.get('document_labels', list(self.documents.keys()))
+        
+        # Define features to compare (need exactly 3 for 3D plot)
+        default_features = ['numwords', 'lexical_diversity', 'avg_sentence_length']
+        features = kwargs.get('features', default_features)
+        
+        # Ensure we have exactly 3 features
+        if len(features) != 3:
+            print(f"Warning: 3D scatter plot requires exactly 3 features. Got {len(features)}. Using first 3 or defaults.")
+            if len(features) > 3:
+                features = features[:3]
+            else:
+                features = default_features[:len(features)] + default_features[len(features):3]
+        
+        # Set up 3D scatter plot
+        figsize = kwargs.get('figsize', (12, 10))
+        fig = plt.figure(figsize=figsize)
+        ax = fig.add_subplot(111, projection='3d')
+        
+        # Collect data
+        x_data = []
+        y_data = []
+        z_data = []
+        valid_labels = []
+        
+        for label in doc_labels:
+            # Check if all three features exist for this document
+            valid = True
+            feature_values = []
+            
+            for feature in features:
+                if feature in self.data and label in self.data[feature]:
+                    feature_values.append(self.data[feature][label])
+                else:
+                    valid = False
+                    break
+            
+            if valid:
+                x_data.append(feature_values[0])
+                y_data.append(feature_values[1])
+                z_data.append(feature_values[2])
+                valid_labels.append(label)
+        
+        # Convert to numpy arrays
+        x_data = np.array(x_data)
+        y_data = np.array(y_data)
+        z_data = np.array(z_data)
+        
+        # Determine colors based on metadata grouping if specified
+        colors = None
+        group_by = kwargs.get('group_by_metadata')
+        
+        if group_by and 'metadata' in self.data:
+            # Extract groups from metadata
+            groups = []
+            for label in valid_labels:
+                if label in self.data['metadata'] and group_by in self.data['metadata'][label]:
+                    groups.append(self.data['metadata'][label][group_by])
+                else:
+                    groups.append('unknown')
+            
+            # Create color map
+            unique_groups = list(set(groups))
+            color_map = {group: i for i, group in enumerate(unique_groups)}
+            colors = [color_map[group] for group in groups]
+            
+            # Create legend handles
+            from matplotlib.lines import Line2D
+            cmap = plt.cm.tab10
+            legend_elements = [
+                Line2D([0], [0], marker='o', color='w', 
+                       markerfacecolor=cmap(color_map[group] % 10), 
+                       markersize=10, label=group)
+                for group in unique_groups
+            ]
+        
+        # Plot the scatter points
+        scatter = ax.scatter(x_data, y_data, z_data, c=colors, cmap='tab10', s=100, alpha=0.7)
+
+        # Add labels for each point
+        for i, label in enumerate(valid_labels):
+            ax.text(x_data[i], y_data[i], z_data[i], label, size=8)
+
+        # Set axis labels
+        ax.set_xlabel(features[0].replace('_', ' ').title())
+        ax.set_ylabel(features[1].replace('_', ' ').title())
+        ax.set_zlabel(features[2].replace('_', ' ').title())
+
+        # Add title
+        title = kwargs.get('title', '3D Feature Comparison of Documents')
+        ax.set_title(title)
+
+        # Add legend if we have groups
+        if colors is not None:
+            # Create legend directly from the scatter plot
+            unique_groups = list(set(groups))
+            legend_handles = []
+            legend_labels = []
+            
+            for group in unique_groups:
+                group_indices = [i for i, g in enumerate(groups) if g == group]
+                if group_indices:
+                    # Use the first point of each group for the legend
+                    idx = group_indices[0]
+                    legend_handles.append(
+                        plt.Line2D([0], [0], 
+                                  marker='o', 
+                                  color='w',
+                                  markerfacecolor=plt.cm.tab10(color_map[group] % 10), 
+                                  markersize=10)
+                    )
+                    legend_labels.append(group)
+            
+            ax.legend(legend_handles, legend_labels, loc='upper right', bbox_to_anchor=(1.1, 1.0))
+
+        # Add grid
+        ax.grid(True)
+        
+        # Show figure
+        if kwargs.get('show', True):
+            plt.tight_layout()
+            plt.show()
+            
+        return fig
+
     def visualize_text_features(self, **kwargs):
         """Create a visualization showing each document's features or similarity to baselines"""
             
@@ -447,12 +596,6 @@ class CapTuring:
 
     def visualize_comparative_features(self, **kwargs):
         """Create a radar chart comparing documents"""
-        try:
-            import matplotlib.pyplot as plt
-            import numpy as np
-        except ImportError:
-            print("This visualization requires matplotlib. Install with: pip install matplotlib")
-            return None
             
         # Get document labels
         doc_labels = kwargs.get('document_labels', list(self.documents.keys()))
@@ -526,8 +669,8 @@ class CapTuring:
         """Create a Sankey diagram showing word flows between documents
         
         Args:
-            word_list: List of specific words to include (default: None, uses words with count >= k)
-            k: Minimum word count to include a word (default: 5)
+            word_list: List of specific words to include (default: None, uses words with total frequency >= k)
+            k: Minimum total frequency across all documents to include a word (default: 5)
             **kwargs: Additional options for customization
         """
         try:
@@ -551,15 +694,16 @@ class CapTuring:
                     counts = {word: count for word, count in self.data['wordcount'][label].items() 
                              if word not in exclude_words}
                     word_counts[label] = counts
-                
-        # Build word list from words with count >= k if not provided
+        
+        # Build word list from words with total frequency >= k if not provided
         if word_list is None:
-            word_list = set()
+            # Calculate total frequency for each word across all documents
+            total_word_counts = Counter()
             for label, counts in word_counts.items():
-                # Get words with count >= k
-                filtered_words = [word for word, count in counts.items() if count >= k]
-                word_list.update(filtered_words)
-            word_list = list(word_list)
+                total_word_counts.update(counts)
+            
+            # Filter words by total frequency across all documents
+            word_list = [word for word, count in total_word_counts.items() if count >= k]
         
         # Create Sankey data
         sources = []
