@@ -224,7 +224,7 @@ def main():
     # 1. Sankey diagram visualization
     print("\n1. Word Count Sankey Diagram:")
     analyzer.wordcount_sankey(
-        k=30,
+        k=25,
         title=f"Word Distribution Across {TOPIC.upper()} Documents",
         show=True,
         highlight_baselines=True,
@@ -255,7 +255,6 @@ def main():
     analyzer.visualize_3d_features(
         title=f"3D Feature Comparison - {TOPIC.upper()}",
         features=['avg_word_length', 'lexical_diversity', 'avg_sentence_length'],
-        group_by_metadata='group',  # Change from 'type' to 'group'
         figsize=(12, 10)
     )
     
